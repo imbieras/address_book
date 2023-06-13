@@ -1,9 +1,12 @@
 #include "linkedlist.h"
 #include <errno.h>
+#include <signal.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+extern int stop_loop;
 
 void err_n_die(const char *fmt, ...) {
   int errno_save;
@@ -25,6 +28,20 @@ void err_n_die(const char *fmt, ...) {
   exit(EXIT_FAILURE);
 }
 
+void clear_input_buffer() {
+  int c;
+  while ((c = getchar()) != '\n' && c != EOF) {
+    continue;
+  }
+}
+
+void signal_handler(int signal) {
+  if (signal == SIGINT) {
+    stop_loop = 1;
+    printf("\nCTRL+C received. Exiting...\n");
+  }
+}
+
 Node *create_node(Person data) {
   Node *new_node = (Node *)malloc(sizeof(Node));
   if (new_node == NULL) {
@@ -33,6 +50,52 @@ Node *create_node(Person data) {
   new_node->data = data;
   new_node->next = NULL;
   return new_node;
+}
+
+Person create_person_input() {
+  Person data;
+  GET_INPUT("Enter name: ", name);
+  GET_INPUT("Enter surname: ", surname);
+  GET_INPUT("Enter email: ", email);
+  GET_INPUT("Enter phone number: ", phone_number);
+
+  return data;
+}
+
+void handle_user_input(Node **head) {
+  int choice;
+  Person new_person;
+  int index;
+
+  printf("1. Add at head\n");
+  printf("2. Add at index\n");
+  printf("Enter your choice: ");
+
+  if (scanf("%d", &choice) == 1 && getchar() == '\n') {
+    switch (choice) {
+    case 1:
+      new_person = create_person_input();
+      add_node_at_head(head, new_person);
+      break;
+    case 2:
+      printf("Enter index: ");
+      while (scanf("%d", &index) != 1 || index < 0) {
+        printf("Invalid index. Please enter a non-negative integer: ");
+        clear_input_buffer();
+      }
+
+      clear_input_buffer();
+
+      new_person = create_person_input();
+      add_node_at_index(head, new_person, index);
+      break;
+    default:
+      printf("Invalid choice\n");
+    }
+  } else {
+    printf("Invalid choice. Please enter a non-negative integer.\n");
+    clear_input_buffer();
+  }
 }
 
 void display_nodes(Node *head) {
@@ -53,6 +116,13 @@ void add_node_at_head(Node **head, Person data) {
 }
 
 void add_node_at_index(Node **head, Person data, int index) {
+  if (*head == NULL) {
+    return;
+  }
+
+  if (index > (get_length(*head) - 1))
+    return;
+
   if (index == 0) {
     add_node_at_head(head, data);
     return;
@@ -60,19 +130,24 @@ void add_node_at_index(Node **head, Person data, int index) {
 
   Node *new_node = create_node(data);
   Node *curr = *head;
+  Node *prev = NULL;
 
-  for (int i = 0; i < index - 1 && curr->next != NULL; i++) {
+  for (int i = 0; i < index && curr != NULL; i++) {
+    prev = curr;
     curr = curr->next;
   }
 
-  new_node->next = curr->next;
-  curr->next = new_node;
+  prev->next = new_node;
+  new_node->next = curr;
 }
 
 void delete_node_at_index(Node **head, int index) {
   if (*head == NULL) {
     return;
   }
+
+  if (index > (get_length(*head) - 1))
+    return;
 
   Node *curr = *head;
   Node *prev = NULL;
@@ -96,6 +171,16 @@ void delete_node_at_index(Node **head, int index) {
   free(curr);
 }
 
+int get_length(Node *head) {
+  int len = 0;
+  Node *curr = head;
+  while (curr != NULL) {
+    len++;
+    curr = curr->next;
+  }
+  return len;
+}
+
 void free_linked_list(Node **head) {
   Node *curr = *head;
   Node *next;
@@ -110,7 +195,11 @@ void free_linked_list(Node **head) {
 }
 
 Node *find_node_at_index(Node *head, int index) {
+  if (index > (get_length(head) - 1))
+    return NULL;
+
   Node *curr = head;
+
   for (int i = 0; i < index && curr != NULL; i++) {
     curr = curr->next;
   }
@@ -150,6 +239,15 @@ int read_csv_file(const char *filename, Node **head) {
   int line_count = 0;
 
   while (fgets(line, sizeof(line), file) != NULL && line_count < MAX_PERSONS) {
+    if (strcmp(line, "\n") == 0) {
+      continue;
+    }
+
+    char *ptr = strchr(line, '\n');
+    if (ptr) {
+      *ptr = '\0';
+    }
+
     char *token;
     char *fields[MAX_CSV_FIELDS];
     int field_count = 0;

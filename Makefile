@@ -4,7 +4,7 @@ SOURCES:=$(wildcard *.c)
 OBJS:=$(SOURCES:.c=.o)
 BIN:=address_book
 
-.PHONY: ALL clean
+.PHONY: all clean
 
 all: $(BIN)
 
