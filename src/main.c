@@ -1,4 +1,4 @@
-#include "linkedlist.h"
+#include "../lib/linkedlist.h"
 #include <errno.h>
 #include <linux/limits.h>
 #include <pwd.h>
