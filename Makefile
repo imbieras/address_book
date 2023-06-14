@@ -1,15 +1,11 @@
-CC:=gcc
-CFLAGS:=-Wall -Wextra -pedantic -std=c99
-SOURCES:=$(wildcard *.c)
-OBJS:=$(SOURCES:.c=.o)
-BIN:=address_book
+CC := gcc
 
 .PHONY: all clean
 
-all: $(BIN)
-
-$(BIN): $(OBJS)
-	$(CC) $(CFLAGS) -o $@ $^
+all:
+	$(MAKE) -C lib
+	$(MAKE) -C src
 
 clean:
-	rm -f $(BIN) $(OBJS)
+	$(MAKE) -C lib clean
+	$(MAKE) -C src clean
