@@ -1,4 +1,6 @@
+#include "../lib/helper.h"
 #include "../lib/linkedlist.h"
+#include "helper.h"
 #include <errno.h>
 #include <linux/limits.h>
 #include <pwd.h>
@@ -10,13 +12,12 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#define SEPARATOR_LINE "--------------------------------------------------"
-#define PRINT_SEPARATOR() printf("%s\n", SEPARATOR_LINE)
-
 int stop_loop = 0;
 
 int main(void) {
   signal(SIGINT, signal_handler);
+
+  Node *head = NULL;
 
   char *homedir;
   if ((homedir = getenv("HOME")) == NULL) {
@@ -30,69 +31,42 @@ int main(void) {
   }
   snprintf(address_file_path, PATH_MAX, "%s%s", homedir, "/addresses.csv");
 
-  Node *head = NULL;
-
   if (!read_csv_file(address_file_path, &head)) {
     printf("Failed to read CSV file. Continuing without it.\n");
   }
 
-  Person p1 = {"Raina", "Arquit", "Raina.Arquit@example.com", "37039559962"};
-  Person p2 = {"Briney", "Ardeha", "Briney.Ardeha@example.com", "37013377064"};
-  Person p3 = {"Kimmy", "Gilbertson", "Kimmy.Gilbertson@example.com",
-               "37061591270"};
-
-  add_node_at_head(&head, p1);
-  add_node_at_head(&head, p2);
-  add_node_at_head(&head, p3);
-
-  printf("All Nodes:\n");
-  display_nodes(head);
-
-  PRINT_SEPARATOR();
-
-  Person p4 = {"Maud", "Gaulin", "Maud.Gaulin@example.com", "37000666859"};
-  add_node_at_index(&head, p4, 2);
-
-  printf("After Adding at Index 2:\n");
-  display_nodes(head);
-
-  PRINT_SEPARATOR();
-
-  delete_node_at_index(&head, 1);
-
-  printf("After Deleting at Index 1:\n");
-  display_nodes(head);
-
-  PRINT_SEPARATOR();
-
-  Node *found_node = find_node_at_index(head, 1);
-  if (found_node != NULL) {
-    printf("Found Node at Index 1:\n");
-    printf("Name: %s\n", found_node->data.name);
-    printf("Surname: %s\n", found_node->data.surname);
-    printf("Email: %s\n", found_node->data.email);
-    printf("Phone Number: %s\n", found_node->data.phone_number);
-  }
-
-  PRINT_SEPARATOR();
-
-  Node *found_node_by_email =
-      find_node_by_data(head, "email", "Maud.Gaulin@example.com");
-  if (found_node_by_email != NULL) {
-    printf("Found Node by Email:\n");
-    printf("Name: %s\n", found_node_by_email->data.name);
-    printf("Surname: %s\n", found_node_by_email->data.surname);
-    printf("Email: %s\n", found_node_by_email->data.email);
-    printf("Phone Number: %s\n", found_node_by_email->data.phone_number);
-  }
-
-  PRINT_SEPARATOR();
+  print_usage();
 
   while (!stop_loop) {
-    handle_user_input(&head);
-    PRINT_SEPARATOR();
-    display_nodes(head);
-    PRINT_SEPARATOR();
+    switch (get_user_option()) {
+    case 1:
+      display_list(head);
+      break;
+    case 2:
+      add_node_at_head(&head, create_person_input());
+      break;
+    case 3:
+      add_node_at_index(&head, create_person_input(), get_user_option());
+      break;
+    case 4:
+      find_by_keyword(head);
+      break;
+    case 5:
+      delete_node_at_index(&head, get_user_option());
+      break;
+    case 6:
+      printf("List size %d\n", get_length(head));
+      break;
+    case 7:
+      free_linked_list(&head);
+      break;
+    case 8:
+      stop_loop = 1;
+      break;
+    default:
+      printf("Your selected option doesn't exist\n");
+      break;
+    }
   }
 
   free(address_file_path);
