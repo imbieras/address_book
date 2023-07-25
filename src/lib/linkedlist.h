@@ -20,12 +20,13 @@ typedef struct Node {
 
 Node *create_node(Person data);
 void display_person(Node *node);
-void display_list(Node *head);
-void add_node_at_head(Node **head, Person data);
-void add_node_at_index(Node **head, Person data, int index);
-void delete_node_at_index(Node **head, int index);
+int display_list(Node *head);
+int add_node_at_head(Node **head, Person data);
+int add_node_at_index(Node **head, Person data, int index);
+int delete_node_at_index(Node **head, int index);
 int get_length(Node *head);
-void free_linked_list(Node **head);
+int free_linked_list(Node **head);
+Node *copy_node(Node *src);
 Node *find_node_at_index(Node *head, int index);
 Node *find_node_by_data(Node *head, char *field, char *value);
 

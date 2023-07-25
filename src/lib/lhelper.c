@@ -1,5 +1,5 @@
-#include "helper.h"
-#include "../src/helper.h"
+#include "lhelper.h"
+#include "../helper.h"
 #include "linkedlist.h"
 #include <stdio.h>
 #include <stdlib.h>

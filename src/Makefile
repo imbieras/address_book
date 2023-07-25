@@ -3,8 +3,8 @@ CFLAGS := $(GFLAGS)
 SOURCES := $(wildcard *.c)
 OBJS := $(SOURCES:.c=.o)
 BIN := ../address_book
-LDFLAGS := -L../lib -Wl,-rpath='./lib' -llinkedlist 
-INCLUDE := -I../lib
+LDFLAGS := -L./lib -Wl,-rpath='./lib' -llinkedlist 
+INCLUDE := -I./lib
 
 .PHONY: all clean
 

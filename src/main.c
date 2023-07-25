@@ -1,5 +1,5 @@
-#include "../lib/helper.h"
-#include "../lib/linkedlist.h"
+#include "./lib/lhelper.h"
+#include "./lib/linkedlist.h"
 #include "helper.h"
 #include <errno.h>
 #include <linux/limits.h>

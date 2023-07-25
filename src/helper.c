@@ -1,6 +1,6 @@
 #include "helper.h"
-#include "../lib/helper.h"
-#include "../lib/linkedlist.h"
+#include "./lib/lhelper.h"
+#include "./lib/linkedlist.h"
 #include <errno.h>
 #include <signal.h>
 #include <stdarg.h>
@@ -69,19 +69,25 @@ int get_user_option() {
   }
 }
 
-void find_by_index(Node *head) {
+int find_by_index(Node *head) {
+  if (head == NULL) {
+    printf("List is empty\n\n");
+    return 1;
+  }
+
   int index = get_user_option();
   Node *temp = find_node_at_index(head, index);
   if (temp != NULL) {
     printf("Address found at position - %d\n", index);
     display_person(temp);
+    return 0;
   } else {
     printf("No address found at position - %d\n\n", index);
+    return 1;
   }
-  return;
 }
 
-void find_by_keyword(Node *head) {
+int find_by_keyword(Node *head) {
   char *field = NULL;
   char *value = malloc((sizeof(char) * BUFFER_SIZE) + 1);
   if (value == NULL) {
@@ -109,10 +115,12 @@ void find_by_keyword(Node *head) {
     field = "phone_number";
     break;
   case 5:
-    return;
+    free(value);
+    return 1;
   default:
     printf("Your selected option doesn't exist\n");
-    break;
+    free(value);
+    return 1;
   }
 
   GET_INPUT("Enter the search keyword: ", value);
@@ -121,14 +129,14 @@ void find_by_keyword(Node *head) {
 
   if (temp_head != NULL) {
     display_list(temp_head);
+    free_linked_list(&temp_head);
+    free(value);
+    return 0;
   } else {
     printf("No address was found by the keyword - %s\n\n", value);
-  }
-  if (value != NULL) {
     free(value);
+    return 1;
   }
-
-  free_linked_list(&temp_head);
 }
 
 int read_csv_file(const char *filename, Node **head) {
@@ -178,9 +186,10 @@ int read_csv_file(const char *filename, Node **head) {
       p.phone_number[sizeof(p.phone_number) - 1] = '\0';
 
       add_node_at_head(head, p);
+      line_count++;
+    } else {
+      printf("Skipping invalid entry in CSV file '%s'.\n", filename);
     }
-
-    line_count++;
   }
 
   fclose(file);

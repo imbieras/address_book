@@ -1,7 +1,7 @@
 #ifndef HELPER_H
 #define HELPER_H
 
-#include "../lib/linkedlist.h"
+#include "./lib/linkedlist.h"
 
 #define SEPARATOR_LINE "--------------------------------------------------"
 #define PRINT_SEPARATOR() printf("%s\n", SEPARATOR_LINE)
@@ -24,8 +24,8 @@ void clear_input_buffer();
 void signal_handler(int signal);
 void print_usage();
 int get_user_option();
-void find_by_index(Node *head);
-void find_by_keyword(Node *head);
+int find_by_index(Node *head);
+int find_by_keyword(Node *head);
 int read_csv_file(const char *filename, Node **head);
 
 #endif // HELPER_H
